@@ -2,11 +2,15 @@ import streamlit as st
 from groq import Groq
 
 st.title("Molas AI Assistant")
+
+# Dito natin idinefine ang system_prompt para hindi na mag-error
+system_prompt = "Ikaw si Molas AI Assistant, ang personal na AI ni boss."
+
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "system", "content": "Ikaw si Molas AI Assistant, ang personal na AI ni boss."}
+        {"role": "system", "content": system_prompt}
     ]
 
 for message in st.session_state["messages"]:
