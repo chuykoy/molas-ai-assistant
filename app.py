@@ -3,7 +3,6 @@ from groq import Groq
 
 st.title("Molas AI Assistant")
 
-# Dito natin idinefine ang system_prompt para hindi na mag-error
 system_prompt = "Ikaw si Molas AI Assistant, ang personal na AI ni boss."
 
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
