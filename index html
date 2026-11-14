@@ -1,0 +1,102 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1">  
+<title>CHUY AI</title>  
+<style>  
+*{box-sizing:border-box}  
+body{margin:0;background:#080d19;color:white;font-family:Arial}  
+.app{max-width:700px;margin:auto;height:100dvh;display:flex;flex-direction:column;background:#101a2b}  
+header{padding:16px;background:#14243c;display:flex;align-items:center;gap:12px}  
+.logo{font-size:32px}  
+header h2{margin:0}  
+header small{color:#39e6c1}  
+#messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:12px}  
+.welcome{text-align:center;margin:auto;color:#a9bfd9}  
+.welcome h1{color:#35dcff}  
+.msg{max-width:90%;padding:13px;border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}  
+.user{align-self:flex-end;background:#17639a}  
+.bot{align-self:flex-start;background:#22344f}  
+footer{padding:12px;background:#14243c}  
+.row{display:flex;gap:8px}  
+textarea{flex:1;resize:none;height:50px;background:#21344e;color:white;border:1px solid #425775;border-radius:12px;padding:14px;font-size:15px}  
+button{background:#00c9ed;color:#061323;border:0;border-radius:12px;padding:12px 18px;font-weight:bold}  
+#status{padding:5px 12px;color:#86a6c5;font-size:12px}  
+</style>  
+</head>  
+<body>  
+<div class="app">  
+<header>  
+<div class="logo">🤖</div>  
+<div>  
+<h2>CHUY AI</h2>  
+<small>● REAL AI ASSISTANT</small>  
+</div>  
+</header>  
+<div id="messages">  
+<div class="welcome">  
+<div style="font-size:65px">🤖</div>  
+<h1>CHUY AI</h1>  
+<p>Your Personal AI Assistant</p>  
+<p>💻 Code Creator<br>🎮 Game Creator<br>🧠 Smart Assistant</p>  
+<p>Maayong adlaw! Unsa akong ikatabang?</p>  
+</div>  
+</div>  
+<div id="status">Ready</div>  
+<footer>  
+<div class="row">  
+<textarea id="input" placeholder="Type your command..."></textarea>  
+<button id="send">➤</button>  
+</div>  
+</footer>  
+</div>  
+<script>  
+const messages=document.getElementById("messages");  
+const input=document.getElementById("input");  
+const status=document.getElementById("status");  
+let history=[];  
+let busy=false;  function add(text,type){
+document.querySelector(".welcome")?.remove();
+const d=document.createElement("div");
+d.className="msg "+type;
+d.textContent=text;
+messages.appendChild(d);
+messages.scrollTop=messages.scrollHeight;
+}
+
+async function send(){
+const text=input.value.trim();
+if(!text||busy)return;
+input.value="";
+add(text,"user");
+history.push({role:"user",content:text});
+busy=true;
+status.textContent="CHUY AI is thinking...";
+try{
+const r=await fetch("/api/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({messages:history})
+});
+const data=await r.json();
+if(!r.ok)throw Error(data.error||"Connection error");
+add(data.reply,"bot");
+history.push({role:"assistant",content:data.reply});
+status.textContent="Connected";
+}catch(e){
+history.pop();
+add("AI connection error: "+e.message,"bot");
+status.textContent="Not connected";
+}
+busy=false;
+}
+document.getElementById("send").onclick=send;
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter"&&!e.shiftKey){
+e.preventDefault();send();
+}
+});
+</script>
+
+</body>  
+</html>
