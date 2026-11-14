@@ -1,28 +1,33 @@
 import streamlit as st
-from openai import OpenAI
+from groq import Groq
 
-st.title("Molas-Ai Assistant")
+st.title("Molas AI Assistant")
 
-# Set OpenAI API key from Streamlit secrets
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+system_prompt = "Ikaw si Molas AI Assistant, ang personal na AI ni boss chuy."
 
-# Set a default model
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-# Initialize chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state["messages"] = [
+        {"role": "system", "content": system_prompt}
+    ]
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for message in st.session_state["messages"]:
+    if message["role"] != "system":
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-# Accept user input
-if prompt := st.chat_input("What is up?"):
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    # Display user message in chat message container
+if prompt := st.chat_input("Ano ang ipapagawa mo kay Molas AI?"):
+    st.session_state["messages"].append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
+
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=st.session_state["messages"]
+    )
+    ai_response = response.choices[0].message.content
+
+    st.session_state["messages"].append({"role": "assistant", "content": ai_response})
+    with st.chat_message("assistant"):
+        st.markdown(ai_response)
